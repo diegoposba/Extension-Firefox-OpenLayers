@@ -55,9 +55,22 @@ fetch(capabilitiesUrl)
         })
       })
     );
+
+    const accuracyFeature = new ol.Feature();
+    accuracyFeature.setStyle(
+        new ol.style.Style({
+            fill: new ol.style.Fill({
+            color: 'rgba(51, 153, 204, 0.2)'
+            }),
+            stroke: new ol.style.Stroke({
+            color: '#3399CC',
+            width: 2
+            })
+        })
+        );
     
     const vectorSource = new ol.source.Vector({
-      features: [positionFeature]
+      features: [accuracyFeature, positionFeature]
     });
     
     const vectorLayer = new ol.layer.Vector({
@@ -106,6 +119,8 @@ fetch(capabilitiesUrl)
       if (coordinates) {
         // Mettre à jour la position du marqueur
         positionFeature.setGeometry(new ol.geom.Point(coordinates));
+        const accuracy = geolocation.getAccuracy();
+        accuracyFeature.setGeometry(new ol.geom.Circle(coordinates, accuracy));
         
         // Animer le zoom vers la position de l'utilisateur
         view.animate({
