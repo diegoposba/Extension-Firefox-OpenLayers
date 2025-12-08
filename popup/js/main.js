@@ -4,10 +4,8 @@ import { MapManager } from './map.js';
 const ui = new UIManager();
 const mapManager = new MapManager('map', 'popup');
 
-// --- Initialisation ---
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Vérification du stockage
   browser.storage.local.get(['geolocationPermission']).then((result) => {
     if (result.geolocationPermission === 'always') {
       launchMap(true);
@@ -16,8 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
-
-// --- Gestionnaires d'événements UI ---
 
 document.getElementById('btn-always').addEventListener('click', () => {
   browser.storage.local.set({ geolocationPermission: 'always' });
@@ -37,7 +33,6 @@ document.getElementById('btn-back-menu').addEventListener('click', () => {
   ui.showPermission();
 });
 
-// Checkbox footer
 document.getElementById('check-always-allow').addEventListener('change', (e) => {
   if (e.target.checked) {
     browser.storage.local.set({ geolocationPermission: 'always' });
@@ -46,7 +41,6 @@ document.getElementById('check-always-allow').addEventListener('change', (e) => 
   }
 });
 
-// Fermeture popup
 document.getElementById('popup-closer').addEventListener('click', () => {
   mapManager.closePopup();
   document.getElementById('popup-closer').blur();
