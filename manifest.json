@@ -10,7 +10,8 @@
   },
 
   "permissions": [
-    "geolocation"
+    "geolocation",
+    "storage"
   ],
 
   "browser_action": {
