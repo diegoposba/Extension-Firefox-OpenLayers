@@ -9,10 +9,18 @@
     "48": "icons/border-48.png"
   },
 
-  "content_scripts": [
-    {
-      "matches": ["*://*.mozilla.org/*"],
-      "js": ["borderify.js"]
-    }
-  ]
+  "permissions": [
+    "geolocation"
+  ],
+
+  "browser_action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "48": "icons/icon-48.png",
+      "96": "icons/icon-96.png"
+    },
+    "default_title": "Geoloc"
+  },
+  
+  "content_security_policy": "script-src 'self' https://cdn.jsdelivr.net; object-src 'self'"
 }
