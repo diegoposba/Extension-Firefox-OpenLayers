@@ -10,43 +10,59 @@
 </head>
 <body>
 
-  <div id="permission-screen">
-    <h3>Autorisation de localisation</h3>
-    <p>Cette extension a besoin de votre position pour fonctionner.</p>
-    <button id="btn-always" class="btn btn-primary">Laisser la localisation activée</button>
-    <button id="btn-once" class="btn btn-secondary">Activer la localisation uniquement une fois</button>
-    <button id="btn-deny" class="btn btn-danger">Ne pas autoriser</button>
+  <div id="home-screen">
+    <h2>OLE Map</h2>
+    <p>Choisissez un mode :</p>
+    <button id="btn-mode-geoloc" class="btn btn-primary big-btn">
+      📍 Ma Position
+    </button>
+    <button id="btn-mode-route" class="btn btn-secondary big-btn">
+      🚗 Itinéraire
+    </button>
   </div>
 
-  <div id="denied-screen" style="display: none;">
-    <h3>Localisation désactivée</h3>
-    <p>Vous avez refusé la localisation.</p>
-    <button id="btn-back-menu" class="btn btn-primary">Localiser</button>
+  <div id="hello-world-screen" style="display: none;">
+    <h3>Mode Itinéraire</h3>
+    <p>Hello World ! 🌍</p>
+    <p><small>La fonctionnalité d'itinéraire sera implémentée ici.</small></p>
+    <button class="btn-back-home btn-link">Retour au menu</button>
   </div>
 
-  <div id="map-container">
-    <div id="map"></div>
+  <div id="permission-screen" style="display: none;">
+    <h3>Autorisation requise</h3>
+    <p>Pour afficher votre position, nous avons besoin de votre accord.</p>
+    <button id="btn-always" class="btn btn-primary">Toujours activer</button>
+    <button id="btn-once" class="btn btn-secondary">Juste une fois</button>
+    <button id="btn-deny" class="btn btn-danger">Refuser</button>
+    <button class="btn-back-home btn-link">Retour</button>
+  </div>
+
+  <div id="map-wrapper" style="display: none;">
     
-    <div id="loading-overlay">
-      <div class="loader"></div>
-      <p>Recherche de votre position...</p>
+    <div id="map-container">
+      <div id="map"></div>
+      
+      <div id="loading-overlay" style="display: none;">
+        <div class="loader"></div>
+        <p>Recherche de votre position...</p>
+      </div>
+
+      <div id="popup" class="ol-popup">
+        <a href="#" id="popup-closer" class="ol-popup-closer">×</a>
+        <div id="popup-content" class="popup-content"></div>
+      </div>
     </div>
 
-    <div id="popup" class="ol-popup">
-      <a href="#" id="popup-closer" class="ol-popup-closer">×</a>
-      <div id="popup-content" class="popup-content"></div>
+    <div id="footer-controls">
+      <label style="cursor: pointer; display: flex; align-items: center;">
+        <input type="checkbox" id="check-always-allow" style="margin-right: 8px;">
+        Toujours autoriser
+      </label>
+      <button class="btn-back-home btn-link" style="margin-left: auto;">Menu</button>
     </div>
   </div>
 
-  <div id="footer-controls">
-    <label style="cursor: pointer; display: flex; align-items: center;">
-      <input type="checkbox" id="check-always-allow" style="margin-right: 8px;">
-      Toujours autoriser la localisation
-    </label>
-  </div>
-  
   <script src="https://cdn.jsdelivr.net/npm/ol@v10.3.1/dist/ol.js"></script>
-  
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

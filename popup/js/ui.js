@@ -1,19 +1,30 @@
 export class UIManager {
   constructor() {
     this.screens = {
+      home: document.getElementById('home-screen'),
+      helloWorld: document.getElementById('hello-world-screen'),
       permission: document.getElementById('permission-screen'),
-      denied: document.getElementById('denied-screen'),
-      map: document.getElementById('map-container')
+      mapWrapper: document.getElementById('map-wrapper')
     };
-    
-    this.footer = document.getElementById('footer-controls');
+
     this.loadingOverlay = document.getElementById('loading-overlay');
     this.checkboxAlways = document.getElementById('check-always-allow');
     
-    // Éléments Popup
+    // Popup Elements
     this.popupContainer = document.getElementById('popup');
     this.popupContent = document.getElementById('popup-content');
-    this.popupCloser = document.getElementById('popup-closer');
+  }
+
+  // --- NAVIGATION ---
+  
+  showHome() {
+    this._hideAll();
+    this.screens.home.style.display = 'flex';
+  }
+
+  showHelloWorld() {
+    this._hideAll();
+    this.screens.helloWorld.style.display = 'flex';
   }
 
   showPermission() {
@@ -21,50 +32,28 @@ export class UIManager {
     this.screens.permission.style.display = 'flex';
   }
 
-  showDenied() {
-    this._hideAll();
-    this.screens.denied.style.display = 'flex';
-  }
-
   showMap(isAlwaysAllowed) {
     this._hideAll();
-    this.screens.map.style.display = 'block';
-    this.footer.style.display = 'flex';
+    this.screens.mapWrapper.style.display = 'flex';
     this.checkboxAlways.checked = isAlwaysAllowed;
     
-    // Réinitialiser l'état de chargement
+    // On affiche le chargement par défaut en entrant sur la carte
     this.setLoading(true);
   }
+
+  // --- ETATS ---
 
   setLoading(isLoading) {
     this.loadingOverlay.style.display = isLoading ? 'flex' : 'none';
   }
 
-  updatePopupContent(coordinates) {
-    // Si on a des coordonnées, on arrête le chargement
-    this.setLoading(false);
+  updatePopup(htmlContent) {
+    this.setLoading(false); // Si on a du contenu, c'est qu'on a fini de charger
     this.popupContainer.style.display = 'block';
-
-    const lonLat = ol.proj.toLonLat(coordinates);
-    this.popupContent.innerHTML = `
-      <h3>Votre position</h3>
-      <p>Vous êtes ici !</p>
-      <p><small>Lat: ${lonLat[1].toFixed(5)}, Lon: ${lonLat[0].toFixed(5)}</small></p>
-    `;
-  }
-
-  showError(message) {
-    this.setLoading(false);
-    this.popupContainer.style.display = 'block';
-    this.popupContent.innerHTML = `
-      <h3>Erreur</h3>
-      <p>Impossible de vous localiser.</p>
-      <p><small>${message}</small></p>
-    `;
+    this.popupContent.innerHTML = htmlContent;
   }
 
   _hideAll() {
     Object.values(this.screens).forEach(el => el.style.display = 'none');
-    this.footer.style.display = 'none';
   }
 }

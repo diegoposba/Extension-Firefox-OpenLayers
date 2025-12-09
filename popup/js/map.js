@@ -5,8 +5,9 @@ export class MapManager {
     this.geolocation = null;
     this.overlay = null;
     
+    // Features
     this.positionFeature = null;
-    this.accuracyFeature = null; 
+    this.accuracyFeature = null;
     
     this.targetId = targetId;
     this.popupElement = document.getElementById(popupId);
@@ -20,6 +21,7 @@ export class MapManager {
     if (this.isInitialized) return;
 
     try {
+      // 1. WMTS Capabilities
       const response = await fetch('https://data.geopf.fr/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetCapabilities');
       const text = await response.text();
       const parser = new ol.format.WMTSCapabilities();
@@ -47,14 +49,18 @@ export class MapManager {
 
       setTimeout(() => this.map.updateSize(), 200);
 
+      // 3. Features (C'est ici qu'on remet votre style !)
+      
+      // Feature Cercle de Précision (Bleu transparent)
       this.accuracyFeature = new ol.Feature();
       this.accuracyFeature.setStyle(
         new ol.style.Style({
           fill: new ol.style.Fill({ color: 'rgba(51, 153, 204, 0.2)' }),    
-            stroke: new ol.style.Stroke({ color: 'rgba(51, 153, 204, 0.7)', width: 2 })
+          stroke: new ol.style.Stroke({ color: 'rgba(51, 153, 204, 0.7)', width: 2 })
         })
-      );      
+      );
       
+      // Feature Point de Position (Point bleu solide)
       this.positionFeature = new ol.Feature();
       this.positionFeature.setStyle(
         new ol.style.Style({
@@ -75,6 +81,7 @@ export class MapManager {
       });
       this.map.addLayer(vectorLayer);
 
+      // 4. Overlay
       this.overlay = new ol.Overlay({
         element: this.popupElement,
         positioning: 'bottom-center',
@@ -83,6 +90,7 @@ export class MapManager {
       });
       this.map.addOverlay(this.overlay);
 
+      // 5. Geolocation
       this.geolocation = new ol.Geolocation({
         trackingOptions: { enableHighAccuracy: true },
         projection: this.view.getProjection()
@@ -108,16 +116,22 @@ export class MapManager {
 
     this._lastChangeHandler = () => {
       const coords = this.geolocation.getPosition();
-      const accuracyGeometry = this.geolocation.getAccuracy();
+      // On utilise la méthode native d'OpenLayers pour avoir la bonne géométrie projetée
+      const accuracyGeometry = this.geolocation.getAccuracyGeometry();
       
       if (coords) {
-
-        this.positionFeature.setGeometry(new ol.geom.Point(coords));        
-        this.accuracyFeature.setGeometry(new ol.geom.Circle(coords, accuracyGeometry));
-
-        this.view.animate({ center: coords, zoom: 15, duration: 1000 });
+        // Mise à jour position
+        this.positionFeature.setGeometry(new ol.geom.Point(coords));
         
+        // Mise à jour cercle précision
+        if (accuracyGeometry) {
+          this.accuracyFeature.setGeometry(accuracyGeometry);
+        }
+
+        // Animation
+        this.view.animate({ center: coords, zoom: 15, duration: 1000 });
         this.overlay.setPosition(coords);
+        
         if (onPositionChange) onPositionChange(coords);
       }
     };
@@ -138,6 +152,15 @@ export class MapManager {
     const cachedCoords = this.geolocation.getPosition();
     if (cachedCoords) {
       this._lastChangeHandler();
+    }
+  }
+
+  stopTracking() {
+    if(this.geolocation) {
+      this.geolocation.setTracking(false);
+      // On nettoie aussi les listeners
+      if (this._lastChangeHandler) this.geolocation.un('change:position', this._lastChangeHandler);
+      if (this._lastErrorHandler) this.geolocation.un('error', this._lastErrorHandler);
     }
   }
 
