@@ -2,29 +2,28 @@ export class UIManager {
   constructor() {
     this.screens = {
       home: document.getElementById('home-screen'),
-      helloWorld: document.getElementById('hello-world-screen'),
       permission: document.getElementById('permission-screen'),
       mapWrapper: document.getElementById('map-wrapper')
     };
 
+    // Sous-éléments du wrapper carte
+    this.controls = {
+      routing: document.getElementById('routing-controls'),
+      footerGeoloc: document.getElementById('footer-controls')
+    };
+
     this.loadingOverlay = document.getElementById('loading-overlay');
+    this.loadingText = document.getElementById('loading-text');
     this.checkboxAlways = document.getElementById('check-always-allow');
     
-    // Popup Elements
+    // Popup
     this.popupContainer = document.getElementById('popup');
     this.popupContent = document.getElementById('popup-content');
   }
 
-  // --- NAVIGATION ---
-  
   showHome() {
     this._hideAll();
     this.screens.home.style.display = 'flex';
-  }
-
-  showHelloWorld() {
-    this._hideAll();
-    this.screens.helloWorld.style.display = 'flex';
   }
 
   showPermission() {
@@ -32,23 +31,38 @@ export class UIManager {
     this.screens.permission.style.display = 'flex';
   }
 
-  showMap(isAlwaysAllowed) {
+  // Mode Géolocalisation
+  showGeolocMap(isAlwaysAllowed) {
     this._hideAll();
     this.screens.mapWrapper.style.display = 'flex';
-    this.checkboxAlways.checked = isAlwaysAllowed;
     
-    // On affiche le chargement par défaut en entrant sur la carte
-    this.setLoading(true);
+    // UI spécifique Geoloc
+    this.controls.routing.style.display = 'none';
+    this.controls.footerGeoloc.style.display = 'flex';
+    
+    this.checkboxAlways.checked = isAlwaysAllowed;
+    this.setLoading(true, "Recherche position...");
   }
 
-  // --- ETATS ---
+  // Mode Itinéraire
+  showRoutingMap() {
+    this._hideAll();
+    this.screens.mapWrapper.style.display = 'flex';
+    
+    // UI spécifique Route
+    this.controls.routing.style.display = 'flex';
+    this.controls.footerGeoloc.style.display = 'none';
+    
+    this.setLoading(true, "Chargement carte...");
+  }
 
-  setLoading(isLoading) {
+  setLoading(isLoading, text = "Chargement...") {
     this.loadingOverlay.style.display = isLoading ? 'flex' : 'none';
+    if(this.loadingText) this.loadingText.textContent = text;
   }
 
   updatePopup(htmlContent) {
-    this.setLoading(false); // Si on a du contenu, c'est qu'on a fini de charger
+    this.setLoading(false);
     this.popupContainer.style.display = 'block';
     this.popupContent.innerHTML = htmlContent;
   }

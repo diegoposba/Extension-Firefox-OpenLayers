@@ -21,13 +21,6 @@
     </button>
   </div>
 
-  <div id="hello-world-screen" style="display: none;">
-    <h3>Mode Itinéraire</h3>
-    <p>Hello World ! 🌍</p>
-    <p><small>La fonctionnalité d'itinéraire sera implémentée ici.</small></p>
-    <button class="btn-back-home btn-link">Retour au menu</button>
-  </div>
-
   <div id="permission-screen" style="display: none;">
     <h3>Autorisation requise</h3>
     <p>Pour afficher votre position, nous avons besoin de votre accord.</p>
@@ -39,12 +32,20 @@
 
   <div id="map-wrapper" style="display: none;">
     
+    <div id="routing-controls" style="display: none;">
+      <div class="input-row">
+        <input type="text" id="input-start" placeholder="Ville de départ (ex: Paris)">
+        <input type="text" id="input-end" placeholder="Ville d'arrivée (ex: Lyon)">
+      </div>
+      <button id="btn-calculate" class="btn-small">Calculer</button>
+    </div>
+
     <div id="map-container">
       <div id="map"></div>
       
       <div id="loading-overlay" style="display: none;">
         <div class="loader"></div>
-        <p>Recherche de votre position...</p>
+        <p id="loading-text">Chargement...</p>
       </div>
 
       <div id="popup" class="ol-popup">
@@ -53,13 +54,17 @@
       </div>
     </div>
 
-    <div id="footer-controls">
+    <div id="footer-controls" style="display: none;">
       <label style="cursor: pointer; display: flex; align-items: center;">
         <input type="checkbox" id="check-always-allow" style="margin-right: 8px;">
         Toujours autoriser
       </label>
-      <button class="btn-back-home btn-link" style="margin-left: auto;">Menu</button>
     </div>
+    
+    <div id="common-footer" style="background: #fff; padding: 5px; border-top: 1px solid #ddd; text-align: center;">
+       <button class="btn-back-home btn-link">Retour au Menu</button>
+    </div>
+
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/ol@v10.3.1/dist/ol.js"></script>
