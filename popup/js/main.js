@@ -1,19 +1,25 @@
 import { UIManager } from './ui.js';
 import { MapManager } from './map.js';
 import { RoutingMapManager } from './routing-map.js';
+import { AutocompleteManager } from './autocomplete.js'; // <-- Import
 
 // --- CONFIGURATION ---
-const ORS_API_KEY = '5b3ce3597851110001cf624830f2bffe4d7d45f6a9b4fb0648a945ec'; // <-- Remettez votre clé ici !
+const ORS_API_KEY = '5b3ce3597851110001cf624830f2bffe4d7d45f6a9b4fb0648a945ec'; // <-- REMETTRE LA CLÉ ICI
 
 const ui = new UIManager();
 const geolocMap = new MapManager('map', 'popup');
 const routingMap = new RoutingMapManager('map');
+const autocomplete = new AutocompleteManager(ORS_API_KEY); // <-- Init
+
+// Variables pour stocker les coordonnées sélectionnées
+let selectedStartCoords = null;
+let selectedEndCoords = null;
 
 // --- INITIALISATION ---
 document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
+  setupAutocomplete(); // <-- Configuration des inputs
   
-  // Vérification au démarrage
   browser.storage.local.get(['geolocationPermission']).then((result) => {
     if (result.geolocationPermission === 'always') {
       launchGeolocMode(true);
@@ -23,88 +29,88 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+function setupAutocomplete() {
+  // Configurer l'input DÉPART
+  autocomplete.attach(
+    'input-start', 
+    'suggestions-start', 
+    (coords, label) => {
+      selectedStartCoords = coords; // On sauvegarde les coords
+      console.log("Départ choisi:", label, coords);
+    },
+    true // <-- TRUE = Activer "Ma position"
+  );
+
+  // Configurer l'input ARRIVÉE
+  autocomplete.attach(
+    'input-end', 
+    'suggestions-end', 
+    (coords, label) => {
+      selectedEndCoords = coords; // On sauvegarde les coords
+      console.log("Arrivée choisie:", label, coords);
+    },
+    false // Pas de "Ma position" pour l'arrivée (généralement)
+  );
+}
+
 function setupEventListeners() {
-  // 1. Boutons du Menu Principal
-  const btnGeoloc = document.getElementById('btn-mode-geoloc');
-  if (btnGeoloc) {
-    btnGeoloc.addEventListener('click', () => {
-      browser.storage.local.get(['geolocationPermission']).then((result) => {
-        if (result.geolocationPermission === 'always') {
-          launchGeolocMode(true);
-        } else {
-          ui.showPermission();
-        }
-      });
+  // Navigation
+  document.getElementById('btn-mode-geoloc')?.addEventListener('click', () => {
+    browser.storage.local.get(['geolocationPermission']).then((result) => {
+      if (result.geolocationPermission === 'always') launchGeolocMode(true);
+      else ui.showPermission();
     });
-  }
+  });
 
-  const btnRoute = document.getElementById('btn-mode-route');
-  if (btnRoute) {
-    btnRoute.addEventListener('click', () => {
-      launchRoutingMode();
-    });
-  }
+  document.getElementById('btn-mode-route')?.addEventListener('click', launchRoutingMode);
 
-  // 2. Bouton "Calculer" (Mode Itinéraire)
-  const btnCalc = document.getElementById('btn-calculate');
-  if (btnCalc) {
-    btnCalc.addEventListener('click', handleRouteCalculation);
-  }
+  // Calcul Itinéraire
+  document.getElementById('btn-calculate')?.addEventListener('click', handleRouteCalculation);
 
-  // 3. Boutons Retour
+  // Retour
   document.querySelectorAll('.btn-back-home').forEach(btn => {
     btn.addEventListener('click', () => {
-      // On détruit PROPREMENT les instances de carte
       geolocMap.destroy();
       routingMap.destroy();
       
-      // Retour à l'accueil
+      // Reset des inputs et variables
+      document.getElementById('input-start').value = '';
+      document.getElementById('input-end').value = '';
+      selectedStartCoords = null;
+      selectedEndCoords = null;
+      
       ui.showHome();
     });
   });
 
-  // 4. Events Permissions & UI
+  // Permissions & Checkbox
   document.getElementById('btn-always')?.addEventListener('click', () => {
     browser.storage.local.set({ geolocationPermission: 'always' });
     launchGeolocMode(true);
   });
-
   document.getElementById('btn-once')?.addEventListener('click', () => {
     browser.storage.local.remove('geolocationPermission');
     launchGeolocMode(false);
   });
-  
   document.getElementById('btn-deny')?.addEventListener('click', () => ui.showHome());
-
   document.getElementById('popup-closer')?.addEventListener('click', () => {
     geolocMap.closePopup();
     document.getElementById('popup-closer').blur();
   });
 
-  // --- C'EST ICI QUE J'AVAIS OUBLIÉ CE BLOC ---
-  // Gestion de la case à cocher en bas de la carte
   const checkAlways = document.getElementById('check-always-allow');
   if (checkAlways) {
     checkAlways.addEventListener('change', (e) => {
-      if (e.target.checked) {
-        // Si on coche -> on sauve "always"
-        browser.storage.local.set({ geolocationPermission: 'always' });
-      } else {
-        // Si on décoche -> on supprime la permission du stockage
-        browser.storage.local.remove('geolocationPermission');
-      }
+      if (e.target.checked) browser.storage.local.set({ geolocationPermission: 'always' });
+      else browser.storage.local.remove('geolocationPermission');
     });
   }
 }
 
 // --- MODES ---
-
 async function launchGeolocMode(isAlways) {
-  // On s'assure que le mode routing est éteint
   routingMap.destroy();
-  
   ui.showGeolocMap(isAlways);
-  
   try {
     await geolocMap.init(); 
     geolocMap.startTracking(
@@ -112,7 +118,6 @@ async function launchGeolocMode(isAlways) {
         const lonLat = ol.proj.toLonLat(coords);
         ui.updatePopup(`
           <h3>Votre position</h3>
-          <p>Vous êtes ici !</p>
           <p><small>Lat: ${lonLat[1].toFixed(5)}, Lon: ${lonLat[0].toFixed(5)}</small></p>
         `);
       },
@@ -120,16 +125,12 @@ async function launchGeolocMode(isAlways) {
     );
   } catch (e) {
     console.error(e);
-    ui.updatePopup("<p>Erreur critique chargement carte.</p>");
   }
 }
 
 async function launchRoutingMode() {
-  // On détruit le mode geoloc pour libérer les ressources
   geolocMap.destroy();
-
   ui.showRoutingMap();
-  
   try {
     await routingMap.init();
     ui.setLoading(false);
@@ -142,24 +143,35 @@ async function launchRoutingMode() {
 // --- ROUTING LOGIC ---
 
 async function handleRouteCalculation() {
-  const startCity = document.getElementById('input-start').value;
-  const endCity = document.getElementById('input-end').value;
+  // 1. Vérification : est-ce qu'on a bien sélectionné via la liste ?
+  // Si l'utilisateur a tapé du texte sans cliquer sur une suggestion, les variables seront nulles.
+  // Dans ce cas, on pourrait tenter un géocodage de secours, mais pour l'instant forçons la sélection.
+  
+  const startInputVal = document.getElementById('input-start').value;
+  const endInputVal = document.getElementById('input-end').value;
 
-  if (!startCity || !endCity) {
-    alert("Veuillez remplir les deux villes.");
+  if (!startInputVal || !endInputVal) {
+    alert("Veuillez remplir les champs.");
     return;
+  }
+
+  // Si l'utilisateur a tapé "Paris" mais n'a pas cliqué, on tente de le géocoder à la volée
+  if (!selectedStartCoords) {
+    try { selectedStartCoords = await geocodeCity(startInputVal); } 
+    catch(e) { alert("Ville de départ introuvable. Veuillez sélectionner dans la liste."); return; }
+  }
+
+  if (!selectedEndCoords) {
+    try { selectedEndCoords = await geocodeCity(endInputVal); } 
+    catch(e) { alert("Ville d'arrivée introuvable. Veuillez sélectionner dans la liste."); return; }
   }
 
   ui.setLoading(true, "Calcul de l'itinéraire...");
 
   try {
-    const startCoords = await geocodeCity(startCity);
-    const endCoords = await geocodeCity(endCity);
-    const routeGeoJSON = await getRoute(startCoords, endCoords);
-    
+    const routeGeoJSON = await getRoute(selectedStartCoords, selectedEndCoords);
     routingMap.displayRoute(routeGeoJSON);
     ui.setLoading(false);
-
   } catch (error) {
     console.error(error);
     ui.setLoading(false);
@@ -167,12 +179,12 @@ async function handleRouteCalculation() {
   }
 }
 
+// Fonction de secours (si on ne passe pas par l'autocomplete)
 async function geocodeCity(query) {
   const url = `https://api.openrouteservice.org/geocode/search?api_key=${ORS_API_KEY}&text=${encodeURIComponent(query)}&size=1`;
   const response = await fetch(url);
-  if (!response.ok) throw new Error("Erreur geocoding");
   const data = await response.json();
-  if (!data.features || data.features.length === 0) throw new Error(`Ville introuvable : ${query}`);
+  if (!data.features || data.features.length === 0) throw new Error(`Introuvable : ${query}`);
   return data.features[0].geometry.coordinates;
 }
 
