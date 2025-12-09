@@ -22,13 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   setupAutocomplete();
   
-  browser.storage.local.get(['geolocationPermission']).then((result) => {
-    if (result.geolocationPermission === 'always') {
-      launchGeolocMode(true);
-    } else {
-      ui.showHome();
-    }
-  });
+  ui.showHome();
 });
 
 function setupAutocomplete() {
