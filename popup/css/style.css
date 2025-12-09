@@ -48,7 +48,7 @@ body {
 }
 .btn:hover { opacity: 0.9; }
 
-.btn-primary { background-color: #0066cc; color: white; }
+.btn-primary { background-color: #28a745; color: white; }
 .btn-secondary { background-color: #6c757d; color: white; }
 .btn-danger { background-color: #dc3545; color: white; }
 
@@ -61,7 +61,7 @@ body {
 .btn-link {
   background: none;
   border: none;
-  color: #0066cc;
+  color: #28a745;
   cursor: pointer;
   text-decoration: underline;
   margin-top: 10px;
@@ -70,7 +70,7 @@ body {
 /* --- LOADING & POPUP --- */
 .loader {
   border: 5px solid #f3f3f3;
-  border-top: 5px solid #0066cc;
+  border-top: 5px solid #28a745;
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -123,29 +123,27 @@ body {
   border-bottom: 1px solid #ccc;
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Espacement vertical entre les lignes */
+  gap: 10px; 
 }
 
-/* Nouvelle classe pour la ligne des inputs */
 .inputs-row {
   display: flex;
   align-items: center;
-  gap: 8px; /* Espace entre les champs et le bouton swap */
+  gap: 8px; 
   width: 100%;
 }
 
-/* Wrapper input existant - on s'assure qu'il prend la place dispo */
 .autocomplete-wrapper {
   position: relative;
-  flex: 1; /* Prend tout l'espace restant */
+  flex: 1; 
 }
 
 #routing-controls input {
-  width: 100%; /* Prend toute la largeur du wrapper */
+  width: 100%; 
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  box-sizing: border-box; /* Important pour ne pas dépasser */
+  box-sizing: border-box; 
 }
 
 .btn-small {
@@ -173,7 +171,7 @@ body {
 
 .suggestions-list {
   position: absolute;
-  top: 100%; /* Juste en dessous de l'input */
+  top: 100%; 
   left: 0;
   right: 0;
   background: white;
@@ -182,9 +180,9 @@ body {
   border-radius: 0 0 4px 4px;
   max-height: 200px;
   overflow-y: auto;
-  z-index: 1000; /* Au dessus de la carte */
+  z-index: 1000; 
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  display: none; /* Caché par défaut */
+  display: none; 
 }
 
 .suggestion-item {
@@ -202,16 +200,15 @@ body {
 }
 
 .suggestion-item:hover {
-  background-color: #f0f8ff; /* Bleu très clair */
+  background-color: #f1fff0;
 }
 
 .suggestion-icon {
   font-size: 16px;
 }
 
-/* Style spécial pour "Ma position" */
 .current-location {
-  color: #0066cc;
+  color: #28a745;
   font-weight: bold;
   background-color: #e6f2ff;
 }
@@ -220,8 +217,8 @@ body {
 .mode-selector {
   display: flex;
   justify-content: center;
-  gap: 15px; /* Un peu plus d'espace */
-  margin-bottom: 0; /* Plus besoin de margin bottom car gap dans le parent */
+  gap: 15px; 
+  margin-bottom: 0; 
 }
 
 .mode-btn {
@@ -240,15 +237,15 @@ body {
 
 .mode-btn.active {
   background: #e6f2ff;
-  border-color: #0066cc;
-  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+  border-color: #28a745;
+  box-shadow: 0 0 0 2px rgba(17, 204, 0, 0.2);
 }
 
 /* --- Résultats (Stats) --- */
 #route-stats {
   margin-top: 10px;
   padding: 10px;
-  background: #e8f5e9; /* Vert très clair */
+  background: #e8f5e9; 
   border: 1px solid #c8e6c9;
   border-radius: 4px;
   text-align: center;

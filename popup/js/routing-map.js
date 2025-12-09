@@ -8,7 +8,6 @@ export class RoutingMapManager {
   }
 
   async init() {
-    // Si la carte existe déjà, on la nettoie pour repartir de zéro
     if (this.map) {
       this.map.setTarget(null);
       this.map = null;
@@ -55,8 +54,6 @@ export class RoutingMapManager {
   // Affiche le GeoJSON reçu d'OpenRouteService
   displayRoute(geoJson) {
     if (!this.map) return;
-    
-    // Nettoyer l'ancien itinéraire
     this.routeSource.clear();
 
     // OpenRouteService renvoie du WGS84 (Lon, Lat). 
@@ -85,20 +82,16 @@ export class RoutingMapManager {
       // Style de la ligne (Route)
       styles.push(new ol.style.Style({
         stroke: new ol.style.Stroke({
-          color: '#0066cc',
+          color: '#218838',
           width: 5
         })
       }));
-
-      // Si c'est un point (Départ ou Arrivée, souvent inclus dans le GeoJSON d'ORS selon les options)
-      // Note: ORS renvoie généralement une LineString. Pour afficher des marqueurs Départ/Arrivée propres,
-      // on peut ajouter des features manuellement, mais ici on reste simple sur le tracé.
       
       return styles;
     };
   }
 
-  // Nettoyage pour quand on quitte le mode
+  // Nettoyage
   destroy() {
     if (this.map) {
       this.map.setTarget(null);

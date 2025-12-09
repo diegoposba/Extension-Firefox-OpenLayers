@@ -14,10 +14,10 @@
     <h2>OLE Map</h2>
     <p>Choisissez un mode :</p>
     <button id="btn-mode-geoloc" class="btn btn-primary big-btn">
-      📍 Ma Position
+      Ma Position
     </button>
     <button id="btn-mode-route" class="btn btn-secondary big-btn">
-      🚗 Itinéraire
+      Itinéraire
     </button>
   </div>
 
@@ -37,9 +37,15 @@
       <div class="inputs-row">
 
         <div id="transport-modes" class="mode-selector">
-          <button class="mode-btn active" data-mode="driving-car" title="Voiture">🚗</button>
-          <button class="mode-btn" data-mode="cycling-regular" title="Vélo">🚲</button>
-          <button class="mode-btn" data-mode="foot-walking" title="Marche">🚶</button>
+          <button class="mode-btn active" data-mode="driving-car" title="Voiture">
+            <img src="../icons/car.svg" width="24" height="24" alt="Voiture">
+          </button>
+          <button class="mode-btn" data-mode="cycling-regular" title="Vélo">
+            <img src="../icons/bike.svg" width="24" height="24" alt="Vélo">
+          </button>
+          <button class="mode-btn" data-mode="foot-walking" title="Marche">
+            <img src="../icons/pedestrian.svg" width="24" height="24" alt="Piéton">
+          </button>
         </div>
         
         <div class="autocomplete-wrapper">

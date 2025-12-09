@@ -94,7 +94,7 @@ export class UIManager {
     }
 
     statsDiv.style.display = 'block';
-    statsDiv.innerHTML = `🏁 Distance : ${distStr} <br> ⏱️ Temps : ${timeStr}`;
+    statsDiv.innerHTML = `Distance : ${distStr} <br> Temps : ${timeStr}`;
   }
 
   clearRouteStats() {

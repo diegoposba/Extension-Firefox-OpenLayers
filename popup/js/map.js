@@ -54,8 +54,8 @@ export class MapManager {
       this.accuracyFeature = new ol.Feature();
       // On applique le style directement ici
       this.accuracyFeature.setStyle(new ol.style.Style({
-        fill: new ol.style.Fill({ color: 'rgba(51, 153, 204, 0.3)' }), // Un peu plus opaque (0.3)
-        stroke: new ol.style.Stroke({ color: 'rgba(51, 153, 204, 0.8)', width: 2 })
+        fill: new ol.style.Fill({ color: 'rgba(17, 204, 0, 0.2)' }), // Un peu plus opaque (0.3)
+        stroke: new ol.style.Stroke({ color: 'rgba(17, 204, 0, 0.8)', width: 2 })
       }));
       
       // Feature POINT (Position)
@@ -63,7 +63,7 @@ export class MapManager {
       this.positionFeature.setStyle(new ol.style.Style({
         image: new ol.style.Circle({
           radius: 8,
-          fill: new ol.style.Fill({ color: '#3399CC' }),
+          fill: new ol.style.Fill({ color: '#28a745' }),
           stroke: new ol.style.Stroke({ color: '#fff', width: 3 })
         })
       }));

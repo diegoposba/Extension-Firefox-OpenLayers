@@ -27,10 +27,10 @@ export class AutocompleteManager {
         return;
       }
 
-      // Attendre 300ms après la dernière frappe avant de chercher
+      // Attendre 50ms après la dernière frappe avant de chercher
       this.debounceTimer = setTimeout(() => {
         this._fetchSuggestions(query, list, input, onSelect);
-      }, 300);
+      }, 50);
     });
 
     // 2. Gestion du focus pour afficher "Ma position" si vide
@@ -58,7 +58,6 @@ export class AutocompleteManager {
     item.innerHTML = `<span class="suggestion-icon">📍</span> Ma position actuelle`;
     
     item.addEventListener('click', () => {
-      // On demande la position navigateur
       if ("geolocation" in navigator) {
         input.value = "Récupération en cours...";
         navigator.geolocation.getCurrentPosition(
@@ -88,7 +87,7 @@ export class AutocompleteManager {
       const response = await fetch(url);
       const data = await response.json();
 
-      list.innerHTML = ''; // Vider la liste
+      list.innerHTML = ''; 
 
       if (!data.features || data.features.length === 0) {
         list.style.display = 'none';
@@ -102,12 +101,12 @@ export class AutocompleteManager {
 
         const item = document.createElement('div');
         item.className = 'suggestion-item';
-        item.innerHTML = `<span class="suggestion-icon">🌍</span> ${label}`;
+        item.innerHTML = `${label}`;
 
         item.addEventListener('click', () => {
           input.value = label;
           list.style.display = 'none';
-          onSelect(coords, label); // On renvoie les coordonnées direct !
+          onSelect(coords, label); 
         });
 
         list.appendChild(item);

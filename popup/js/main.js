@@ -4,7 +4,7 @@ import { RoutingMapManager } from './routing-map.js';
 import { AutocompleteManager } from './autocomplete.js';
 
 // --- CONFIGURATION ---
-const ORS_API_KEY = '5b3ce3597851110001cf624830f2bffe4d7d45f6a9b4fb0648a945ec'; // <-- VERIFIEZ VOTRE CLE
+const ORS_API_KEY = '5b3ce3597851110001cf624830f2bffe4d7d45f6a9b4fb0648a945ec';
 
 const ui = new UIManager();
 const geolocMap = new MapManager('map', 'popup');
@@ -13,8 +13,6 @@ const autocomplete = new AutocompleteManager(ORS_API_KEY);
 
 let selectedStartCoords = null;
 let selectedEndCoords = null;
-
-// NOUVEAU : Variable pour stocker le mode de transport (par défaut voiture)
 let currentProfile = 'driving-car'; 
 
 // --- INITIALISATION ---
@@ -54,13 +52,13 @@ function setupEventListeners() {
       document.getElementById('input-end').value = '';
       selectedStartCoords = null;
       selectedEndCoords = null;
-      ui.clearRouteStats(); // <-- On vide les stats au retour
+      ui.clearRouteStats(); 
       
       ui.showHome();
     });
   });
 
-  // Permissions & Checkbox ( inchangé ... )
+  // Permissions & Checkbox
   document.getElementById('btn-always')?.addEventListener('click', () => { browser.storage.local.set({ geolocationPermission: 'always' }); launchGeolocMode(true); });
   document.getElementById('btn-once')?.addEventListener('click', () => { browser.storage.local.remove('geolocationPermission'); launchGeolocMode(false); });
   document.getElementById('btn-deny')?.addEventListener('click', () => ui.showHome());
@@ -74,14 +72,13 @@ function setupEventListeners() {
     btn.addEventListener('click', (e) => {
       // 1. Gestion visuelle (classe .active)
       modeBtns.forEach(b => b.classList.remove('active'));
-      // On cible e.currentTarget pour être sûr d'avoir le bouton, même si on clique sur l'emoji
       e.currentTarget.classList.add('active');
 
       // 2. Mise à jour de la variable
       currentProfile = e.currentTarget.dataset.mode;
       console.log("Mode changé pour :", currentProfile);
 
-      // 3. (Optionnel) Recalcul automatique si les champs sont déjà remplis
+      // 3. Recalcul automatique si les champs sont déjà remplis
       if (selectedStartCoords && selectedEndCoords) {
         handleRouteCalculation();
       }
@@ -89,7 +86,7 @@ function setupEventListeners() {
   });
 }
 
-// --- MODES ( inchangé ... ) ---
+// --- MODES ---
 async function launchGeolocMode(isAlways) {
   routingMap.destroy();
   ui.showGeolocMap(isAlways);
@@ -102,7 +99,7 @@ async function launchRoutingMode() {
   try { await routingMap.init(); ui.setLoading(false); } catch (e) { console.error(e); ui.setLoading(false); }
 }
 
-// --- ROUTING LOGIC (Mise à jour) ---
+// --- ROUTING LOGIC ---
 
 async function handleRouteCalculation() {
   const startInput = document.getElementById('input-start').value;
@@ -119,7 +116,7 @@ async function handleRouteCalculation() {
   }
 
   ui.setLoading(true, "Calcul de l'itinéraire...");
-  ui.clearRouteStats(); // On efface les anciennes stats
+  ui.clearRouteStats(); 
 
   try {
     // On passe currentProfile à la fonction getRoute
@@ -128,7 +125,7 @@ async function handleRouteCalculation() {
     // 1. Afficher la ligne
     routingMap.displayRoute(data);
 
-    // 2. Afficher les stats (NOUVEAU)
+    // 2. Afficher les stats 
     // ORS renvoie les stats dans features[0].properties.summary
     if (data.features && data.features.length > 0) {
       const summary = data.features[0].properties.summary;
