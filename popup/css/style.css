@@ -123,19 +123,29 @@ body {
   border-bottom: 1px solid #ccc;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px; /* Espacement vertical entre les lignes */
 }
 
-.input-row {
+/* Nouvelle classe pour la ligne des inputs */
+.inputs-row {
   display: flex;
-  gap: 5px;
+  align-items: center;
+  gap: 8px; /* Espace entre les champs et le bouton swap */
+  width: 100%;
+}
+
+/* Wrapper input existant - on s'assure qu'il prend la place dispo */
+.autocomplete-wrapper {
+  position: relative;
+  flex: 1; /* Prend tout l'espace restant */
 }
 
 #routing-controls input {
-  flex: 1;
+  width: 100%; /* Prend toute la largeur du wrapper */
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  box-sizing: border-box; /* Important pour ne pas dépasser */
 }
 
 .btn-small {
@@ -210,8 +220,8 @@ body {
 .mode-selector {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 15px; /* Un peu plus d'espace */
+  margin-bottom: 0; /* Plus besoin de margin bottom car gap dans le parent */
 }
 
 .mode-btn {

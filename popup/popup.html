@@ -34,20 +34,23 @@
     
     <div id="routing-controls" style="display: none;">
       
-      <div id="transport-modes" class="mode-selector">
-        <button class="mode-btn active" data-mode="driving-car" title="Voiture">🚗</button>
-        <button class="mode-btn" data-mode="cycling-regular" title="Vélo">🚲</button>
-        <button class="mode-btn" data-mode="foot-walking" title="Marche">🚶</button>
-      </div>
+      <div class="inputs-row">
 
-      <div class="autocomplete-wrapper">
-        <input type="text" id="input-start" placeholder="Ville de départ (ou 'Ma position')" autocomplete="off">
-        <div id="suggestions-start" class="suggestions-list"></div>
-      </div>
+        <div id="transport-modes" class="mode-selector">
+          <button class="mode-btn active" data-mode="driving-car" title="Voiture">🚗</button>
+          <button class="mode-btn" data-mode="cycling-regular" title="Vélo">🚲</button>
+          <button class="mode-btn" data-mode="foot-walking" title="Marche">🚶</button>
+        </div>
+        
+        <div class="autocomplete-wrapper">
+            <input type="text" id="input-start" placeholder="Départ" autocomplete="off">
+            <div id="suggestions-start" class="suggestions-list"></div>
+        </div>
 
-      <div class="autocomplete-wrapper">
-        <input type="text" id="input-end" placeholder="Ville d'arrivée" autocomplete="off">
-        <div id="suggestions-end" class="suggestions-list"></div>
+        <div class="autocomplete-wrapper">
+            <input type="text" id="input-end" placeholder="Arrivée" autocomplete="off">
+            <div id="suggestions-end" class="suggestions-list"></div>
+        </div>
       </div>
 
       <button id="btn-calculate" class="btn-small">Calculer l'itinéraire</button>
