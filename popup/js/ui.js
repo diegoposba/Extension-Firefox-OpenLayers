@@ -70,4 +70,38 @@ export class UIManager {
   _hideAll() {
     Object.values(this.screens).forEach(el => el.style.display = 'none');
   }
+
+  displayRouteStats(distanceMeters, durationSeconds) {
+    const statsDiv = document.getElementById('route-stats');
+    
+    // Conversion Distance
+    let distStr = '';
+    if (distanceMeters >= 1000) {
+      distStr = (distanceMeters / 1000).toFixed(1) + ' km';
+    } else {
+      distStr = Math.round(distanceMeters) + ' m';
+    }
+
+    // Conversion Durée
+    let timeStr = '';
+    const hours = Math.floor(durationSeconds / 3600);
+    const minutes = Math.round((durationSeconds % 3600) / 60);
+
+    if (hours > 0) {
+      timeStr = `${hours}h ${minutes}min`;
+    } else {
+      timeStr = `${minutes} min`;
+    }
+
+    statsDiv.style.display = 'block';
+    statsDiv.innerHTML = `🏁 Distance : ${distStr} <br> ⏱️ Temps : ${timeStr}`;
+  }
+
+  clearRouteStats() {
+    const statsDiv = document.getElementById('route-stats');
+    if (statsDiv) {
+      statsDiv.style.display = 'none';
+      statsDiv.innerHTML = '';
+    }
+  }
 }

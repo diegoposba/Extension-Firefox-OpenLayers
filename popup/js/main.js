@@ -1,24 +1,26 @@
 import { UIManager } from './ui.js';
 import { MapManager } from './map.js';
 import { RoutingMapManager } from './routing-map.js';
-import { AutocompleteManager } from './autocomplete.js'; // <-- Import
+import { AutocompleteManager } from './autocomplete.js';
 
 // --- CONFIGURATION ---
-const ORS_API_KEY = '5b3ce3597851110001cf624830f2bffe4d7d45f6a9b4fb0648a945ec'; // <-- REMETTRE LA CLÉ ICI
+const ORS_API_KEY = '5b3ce3597851110001cf624830f2bffe4d7d45f6a9b4fb0648a945ec'; // <-- VERIFIEZ VOTRE CLE
 
 const ui = new UIManager();
 const geolocMap = new MapManager('map', 'popup');
 const routingMap = new RoutingMapManager('map');
-const autocomplete = new AutocompleteManager(ORS_API_KEY); // <-- Init
+const autocomplete = new AutocompleteManager(ORS_API_KEY);
 
-// Variables pour stocker les coordonnées sélectionnées
 let selectedStartCoords = null;
 let selectedEndCoords = null;
+
+// NOUVEAU : Variable pour stocker le mode de transport (par défaut voiture)
+let currentProfile = 'driving-car'; 
 
 // --- INITIALISATION ---
 document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
-  setupAutocomplete(); // <-- Configuration des inputs
+  setupAutocomplete();
   
   browser.storage.local.get(['geolocationPermission']).then((result) => {
     if (result.geolocationPermission === 'always') {
@@ -30,147 +32,116 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupAutocomplete() {
-  // Configurer l'input DÉPART
-  autocomplete.attach(
-    'input-start', 
-    'suggestions-start', 
-    (coords, label) => {
-      selectedStartCoords = coords; // On sauvegarde les coords
-      console.log("Départ choisi:", label, coords);
-    },
-    true // <-- TRUE = Activer "Ma position"
-  );
-
-  // Configurer l'input ARRIVÉE
-  autocomplete.attach(
-    'input-end', 
-    'suggestions-end', 
-    (coords, label) => {
-      selectedEndCoords = coords; // On sauvegarde les coords
-      console.log("Arrivée choisie:", label, coords);
-    },
-    false // Pas de "Ma position" pour l'arrivée (généralement)
-  );
+  autocomplete.attach('input-start', 'suggestions-start', (coords) => { selectedStartCoords = coords; }, true);
+  autocomplete.attach('input-end', 'suggestions-end', (coords) => { selectedEndCoords = coords; }, false);
 }
 
 function setupEventListeners() {
-  // Navigation
+  // Navigation Menus
   document.getElementById('btn-mode-geoloc')?.addEventListener('click', () => {
-    browser.storage.local.get(['geolocationPermission']).then((result) => {
-      if (result.geolocationPermission === 'always') launchGeolocMode(true);
+    browser.storage.local.get(['geolocationPermission']).then((r) => {
+      if (r.geolocationPermission === 'always') launchGeolocMode(true);
       else ui.showPermission();
     });
   });
 
   document.getElementById('btn-mode-route')?.addEventListener('click', launchRoutingMode);
 
-  // Calcul Itinéraire
   document.getElementById('btn-calculate')?.addEventListener('click', handleRouteCalculation);
 
-  // Retour
+  // Boutons Retour
   document.querySelectorAll('.btn-back-home').forEach(btn => {
     btn.addEventListener('click', () => {
       geolocMap.destroy();
       routingMap.destroy();
       
-      // Reset des inputs et variables
+      // Reset total
       document.getElementById('input-start').value = '';
       document.getElementById('input-end').value = '';
       selectedStartCoords = null;
       selectedEndCoords = null;
+      ui.clearRouteStats(); // <-- On vide les stats au retour
       
       ui.showHome();
     });
   });
 
-  // Permissions & Checkbox
-  document.getElementById('btn-always')?.addEventListener('click', () => {
-    browser.storage.local.set({ geolocationPermission: 'always' });
-    launchGeolocMode(true);
-  });
-  document.getElementById('btn-once')?.addEventListener('click', () => {
-    browser.storage.local.remove('geolocationPermission');
-    launchGeolocMode(false);
-  });
+  // Permissions & Checkbox ( inchangé ... )
+  document.getElementById('btn-always')?.addEventListener('click', () => { browser.storage.local.set({ geolocationPermission: 'always' }); launchGeolocMode(true); });
+  document.getElementById('btn-once')?.addEventListener('click', () => { browser.storage.local.remove('geolocationPermission'); launchGeolocMode(false); });
   document.getElementById('btn-deny')?.addEventListener('click', () => ui.showHome());
-  document.getElementById('popup-closer')?.addEventListener('click', () => {
-    geolocMap.closePopup();
-    document.getElementById('popup-closer').blur();
-  });
-
+  document.getElementById('popup-closer')?.addEventListener('click', () => { geolocMap.closePopup(); document.getElementById('popup-closer').blur(); });
   const checkAlways = document.getElementById('check-always-allow');
-  if (checkAlways) {
-    checkAlways.addEventListener('change', (e) => {
-      if (e.target.checked) browser.storage.local.set({ geolocationPermission: 'always' });
-      else browser.storage.local.remove('geolocationPermission');
+  if (checkAlways) checkAlways.addEventListener('change', (e) => { if (e.target.checked) browser.storage.local.set({ geolocationPermission: 'always' }); else browser.storage.local.remove('geolocationPermission'); });
+
+  // --- NOUVEAU : GESTION DES MODES DE TRANSPORT ---
+  const modeBtns = document.querySelectorAll('.mode-btn');
+  modeBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      // 1. Gestion visuelle (classe .active)
+      modeBtns.forEach(b => b.classList.remove('active'));
+      // On cible e.currentTarget pour être sûr d'avoir le bouton, même si on clique sur l'emoji
+      e.currentTarget.classList.add('active');
+
+      // 2. Mise à jour de la variable
+      currentProfile = e.currentTarget.dataset.mode;
+      console.log("Mode changé pour :", currentProfile);
+
+      // 3. (Optionnel) Recalcul automatique si les champs sont déjà remplis
+      if (selectedStartCoords && selectedEndCoords) {
+        handleRouteCalculation();
+      }
     });
-  }
+  });
 }
 
-// --- MODES ---
+// --- MODES ( inchangé ... ) ---
 async function launchGeolocMode(isAlways) {
   routingMap.destroy();
   ui.showGeolocMap(isAlways);
-  try {
-    await geolocMap.init(); 
-    geolocMap.startTracking(
-      (coords) => {
-        const lonLat = ol.proj.toLonLat(coords);
-        ui.updatePopup(`
-          <h3>Votre position</h3>
-          <p><small>Lat: ${lonLat[1].toFixed(5)}, Lon: ${lonLat[0].toFixed(5)}</small></p>
-        `);
-      },
-      (err) => ui.updatePopup(`<p>Erreur: ${err.message}</p>`)
-    );
-  } catch (e) {
-    console.error(e);
-  }
+  try { await geolocMap.init(); geolocMap.startTracking((c) => { const ll = ol.proj.toLonLat(c); ui.updatePopup(`<h3>Votre position</h3><p><small>Lat: ${ll[1].toFixed(5)}, Lon: ${ll[0].toFixed(5)}</small></p>`); }, (err) => ui.updatePopup(`<p>Erreur: ${err.message}</p>`)); } catch (e) { console.error(e); }
 }
 
 async function launchRoutingMode() {
   geolocMap.destroy();
   ui.showRoutingMap();
-  try {
-    await routingMap.init();
-    ui.setLoading(false);
-  } catch (e) {
-    console.error(e);
-    ui.setLoading(false);
-  }
+  try { await routingMap.init(); ui.setLoading(false); } catch (e) { console.error(e); ui.setLoading(false); }
 }
 
-// --- ROUTING LOGIC ---
+// --- ROUTING LOGIC (Mise à jour) ---
 
 async function handleRouteCalculation() {
-  // 1. Vérification : est-ce qu'on a bien sélectionné via la liste ?
-  // Si l'utilisateur a tapé du texte sans cliquer sur une suggestion, les variables seront nulles.
-  // Dans ce cas, on pourrait tenter un géocodage de secours, mais pour l'instant forçons la sélection.
-  
-  const startInputVal = document.getElementById('input-start').value;
-  const endInputVal = document.getElementById('input-end').value;
+  const startInput = document.getElementById('input-start').value;
+  const endInput = document.getElementById('input-end').value;
 
-  if (!startInputVal || !endInputVal) {
-    alert("Veuillez remplir les champs.");
-    return;
-  }
+  if (!startInput || !endInput) { alert("Veuillez remplir les champs."); return; }
 
-  // Si l'utilisateur a tapé "Paris" mais n'a pas cliqué, on tente de le géocoder à la volée
+  // Géocodage de secours si nécessaire
   if (!selectedStartCoords) {
-    try { selectedStartCoords = await geocodeCity(startInputVal); } 
-    catch(e) { alert("Ville de départ introuvable. Veuillez sélectionner dans la liste."); return; }
+    try { selectedStartCoords = await geocodeCity(startInput); } catch(e) { alert("Ville de départ introuvable."); return; }
   }
-
   if (!selectedEndCoords) {
-    try { selectedEndCoords = await geocodeCity(endInputVal); } 
-    catch(e) { alert("Ville d'arrivée introuvable. Veuillez sélectionner dans la liste."); return; }
+    try { selectedEndCoords = await geocodeCity(endInput); } catch(e) { alert("Ville d'arrivée introuvable."); return; }
   }
 
   ui.setLoading(true, "Calcul de l'itinéraire...");
+  ui.clearRouteStats(); // On efface les anciennes stats
 
   try {
-    const routeGeoJSON = await getRoute(selectedStartCoords, selectedEndCoords);
-    routingMap.displayRoute(routeGeoJSON);
+    // On passe currentProfile à la fonction getRoute
+    const data = await getRoute(selectedStartCoords, selectedEndCoords, currentProfile);
+    
+    // 1. Afficher la ligne
+    routingMap.displayRoute(data);
+
+    // 2. Afficher les stats (NOUVEAU)
+    // ORS renvoie les stats dans features[0].properties.summary
+    if (data.features && data.features.length > 0) {
+      const summary = data.features[0].properties.summary;
+      // summary.distance est en mètres, summary.duration en secondes
+      ui.displayRouteStats(summary.distance, summary.duration);
+    }
+
     ui.setLoading(false);
   } catch (error) {
     console.error(error);
@@ -179,7 +150,8 @@ async function handleRouteCalculation() {
   }
 }
 
-// Fonction de secours (si on ne passe pas par l'autocomplete)
+// --- API ---
+
 async function geocodeCity(query) {
   const url = `https://api.openrouteservice.org/geocode/search?api_key=${ORS_API_KEY}&text=${encodeURIComponent(query)}&size=1`;
   const response = await fetch(url);
@@ -188,10 +160,14 @@ async function geocodeCity(query) {
   return data.features[0].geometry.coordinates;
 }
 
-async function getRoute(startCoords, endCoords) {
+// Mise à jour de getRoute pour accepter le profile
+async function getRoute(startCoords, endCoords, profile) {
   const startStr = `${startCoords[0]},${startCoords[1]}`;
   const endStr = `${endCoords[0]},${endCoords[1]}`;
-  const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ORS_API_KEY}&start=${startStr}&end=${endStr}`;
+  
+  // Utilisation dynamique du profil (driving-car, cycling-regular, foot-walking)
+  const url = `https://api.openrouteservice.org/v2/directions/${profile}?api_key=${ORS_API_KEY}&start=${startStr}&end=${endStr}`;
+  
   const response = await fetch(url);
   const data = await response.json();
   if (data.error) throw new Error(data.error.message || "Erreur itinéraire");
